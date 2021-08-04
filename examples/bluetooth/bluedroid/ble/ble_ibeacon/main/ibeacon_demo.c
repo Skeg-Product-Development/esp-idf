@@ -61,6 +61,7 @@ static const char* DEMO_TAG = "IBEACON_DEMO";
 static const char* DEBUG_TAG = "DEBUG_PURPOSE";
 extern esp_ble_ibeacon_vendor_t vendor_config;
 static time_t now;
+static time_t restart_timer;
 static bool volatile init = false;
 static volatile bool intervention_device_state = false;
 static int eventLogger = 0;
@@ -723,6 +724,10 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
                     intervention_device_state = false;
                     changing_device_state();
                     // ESP_LOGI(DEMO_TAG, "---------- femi not Found----------");
+                    if((restart_timer - time(0)) < 0)
+                    {  
+                        esp_restart();
+                    }
                 }
             }
 
@@ -733,6 +738,10 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
                         intervention_device_state = false;
                         changing_device_state();
                         //ESP_LOGI(GATTC_TAG, "Unknown Device");
+                    if((restart_timer - time(0)) < 0)
+                    {  
+                        esp_restart();
+                    }
 
                 }
                 // ESP_LOGI(DEMO_TAG, "----------femi Found----------");
@@ -854,6 +863,8 @@ void app_main(void)
         gpio_set_level(GPIO_NUM_16, 0);
 
         elapsed_time_ref = time(now);
+        time(&restart_timer);
+        restart_timer = restart_timer + (time_t)2400; 
 
         init = true;
     }
